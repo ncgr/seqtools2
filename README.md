@@ -1,5 +1,5 @@
 # seqtools2
-Fasta tools for manipulation, filtering, and sequence statistics
+Bioinformatic tools for manipulation, filtering, and statistics
 
 based on seqtools
 
