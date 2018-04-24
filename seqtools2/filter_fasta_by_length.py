@@ -81,17 +81,18 @@ def filter_fasta_by_length(fasta, length, reverse):
     '''
     seqio_in = sys.stdin
     fh = ''
-    if seqio_in:
-        for record in get_seqio_record(seqio_in):
-            if check_length(record.seq, length, reverse):
+    if seqio_in:  # Check STDIN
+        logger.info('Parsing STDIN...  Checking Sequence Lengths...')
+        for record in get_seqio_record(seqio_in):  # get SeqIO record
+            if check_length(record.seq, length, reverse):  # check length
                 print('>{}\n{}'.format(record.description, record.seq))
-    if fasta:
+    if fasta:  # Check FASTA
+        logger.info('Parsing FASTA file...  Checking Sequence Lengths...')
         fh = return_filehandle(fasta)
-        for record in get_seqio_record(fh):
-            if check_length(record.seq, length, reverse):
+        for record in get_seqio_record(fh):  # Get SeqIO record
+            if check_length(record.seq, length, reverse):  # check length
                 print('>{}\n{}'.format(record.description, record.seq))
             
-
 
 if __name__ == '__main__':
     fasta = args.fasta
