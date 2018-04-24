@@ -6,9 +6,8 @@ import subprocess
 import argparse
 import logging
 import re
+from file_helpers import return_filehandle
 from intervaltree import IntervalTree
-from dask_distributed_single.distributed_single import distributed_single
-from dask.distributed import Client
 from time import sleep
 
 
@@ -31,8 +30,8 @@ help='''The FASTA file used as the query.
         Get query length and mark sequences\n\n''')
 
 parser.add_argument('--log_file', metavar = '<FILE>', 
-default='./detect_incongruencies.log',
-help='''File to write log to.  (default:./detect_incongruencies.log)''')
+default='./detect_chimeric_alignments.log',
+help='''File to write log to.  (default:./detect_chimeric_alignments.log)''')
 
 parser.add_argument('--log_level', metavar = '<LOGLEVEL>', default='INFO',
 help='''Log level: DEBUG, INFO, WARNING, ERROR, CRITICAL (default:INFO)''')
@@ -52,37 +51,6 @@ formatter = logging.Formatter(msg_format)
 log_handler.setFormatter(formatter)
 logger = logging.getLogger('detect_incongruencies')
 logger.addHandler(log_handler)
-
-
-def create_directories(dirpath):
-    '''make directory path'''
-    try:
-        os.makedirs(dirpath)
-    except OSError as e:
-        if e.errno != errno.EEXIST:
-            raise
-
-
-def return_filehandle(open_me):
-    '''get me a filehandle, common compression or text'''
-    magic_dict = {
-                  '\x1f\x8b\x08': 'gz'
-#                  '\x42\x5a\x68': 'bz2',
-#                  '\x50\x4b\x03\x04': 'zip'
-                 }
-    max_bytes = max(len(t) for t in magic_dict)
-    with open(open_me) as f:
-        s = f.read(max_bytes)
-    for m in magic_dict:
-        if s.startswith(m):
-            t = magic_dict[m]
-            if t == 'gz':
-                return gzip.open(open_me)
-#            elif t == 'bz2':
-#                return bz2.open(open_me)
-#            elif t == 'zip':
-#                return zipfile.open(open_me)
-    return open(open_me)
 
 
 def parse_fasta_headers(reference, ids):

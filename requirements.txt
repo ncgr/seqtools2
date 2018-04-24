@@ -1,2 +1,4 @@
 biopython==1.70
+intervaltree==2.1.0
 numpy==1.14.2
+sortedcontainers==1.5.10
