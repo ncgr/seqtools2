@@ -6,8 +6,8 @@ import argparse
 import logging
 from time import sleep
 from signal import signal, SIGPIPE, SIG_DFL
-from sequence_helpers import check_stdin, get_seqio_record
-from file_helpers import return_filehandle
+from helpers.sequence_helpers import check_stdin, get_seqio_record
+from helpers.file_helpers import return_filehandle
 
 signal(SIGPIPE, SIG_DFL) 
 

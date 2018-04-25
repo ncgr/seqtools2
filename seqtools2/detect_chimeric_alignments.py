@@ -6,7 +6,7 @@ import subprocess
 import argparse
 import logging
 import re
-from file_helpers import return_filehandle
+from helpers.file_helpers import return_filehandle
 from intervaltree import IntervalTree
 from time import sleep
 
