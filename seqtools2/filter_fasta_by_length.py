@@ -4,8 +4,11 @@ import os
 import sys
 import argparse
 import logging
+from signal import signal, SIGPIPE, SIG_DFL
 from file_helpers import return_filehandle
-from Bio import SeqIO
+from sequence_helpers import check_stdin, get_seqio_record
+
+signal(SIGPIPE, SIG_DFL)
 
 parser = argparse.ArgumentParser(description='''
 
@@ -48,7 +51,7 @@ logging.basicConfig(format=msg_format, datefmt='%m-%d %H:%M',
 log_handler = logging.FileHandler(log_file, mode='w')
 formatter = logging.Formatter(msg_format)
 log_handler.setFormatter(formatter)
-logger = logging.getLogger('detect_incongruencies')
+logger = logging.getLogger('filter_fasta_by_length')
 logger.addHandler(log_handler)
 
 
@@ -67,13 +70,6 @@ def check_length(seq, length, reverse):
     return False
 
 
-def get_seqio_record(seq_handle):
-    '''Parses a filehandle seq_handle and yields the formatted records'''
-    with seq_handle as sopen:
-        for record in SeqIO.parse(sopen, 'fasta'):  # iterate with SeqIO
-            yield record  # yield each record as it is iterated
-
-
 def filter_fasta_by_length(fasta, length, reverse):
     '''Filter FASTA file fasta >= length.
 
@@ -81,12 +77,12 @@ def filter_fasta_by_length(fasta, length, reverse):
     '''
     seqio_in = sys.stdin
     fh = ''
-    if seqio_in:  # Check STDIN
+    if not fasta:  # Check STDIN
         logger.info('Parsing STDIN...  Checking Sequence Lengths...')
         for record in get_seqio_record(seqio_in):  # get SeqIO record
             if check_length(record.seq, length, reverse):  # check length
                 print('>{}\n{}'.format(record.description, record.seq))
-    if fasta:  # Check FASTA
+    else:  # Check FASTA
         logger.info('Parsing FASTA file...  Checking Sequence Lengths...')
         fh = return_filehandle(fasta)
         for record in get_seqio_record(fh):  # Get SeqIO record
@@ -98,9 +94,6 @@ if __name__ == '__main__':
     fasta = args.fasta
     length = args.length
     reverse = args.reverse
-    if not fasta and not sys.stdin:
-        logger.error('FASTA input file or STDIN required!')
-        sys.exit(1)
     if fasta:
         fasta = os.path.abspath(fasta)
     filter_fasta_by_length(fasta, length, reverse)
