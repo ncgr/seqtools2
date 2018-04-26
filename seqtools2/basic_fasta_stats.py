@@ -6,8 +6,8 @@ import argparse
 import logging
 from time import sleep
 from signal import signal, SIGPIPE, SIG_DFL
-from helpers.sequence_helpers import check_stdin, get_seqio_record
-from helpers.file_helpers import return_filehandle
+from helpers.sequence_helpers import get_seqio_record
+from helpers.file_helpers import return_filehandle, check_stdin
 
 signal(SIGPIPE, SIG_DFL) 
 
@@ -26,8 +26,8 @@ parser = argparse.ArgumentParser(description='''
 parser.add_argument('--fasta', metavar = '</path/to/my/fasta.fa>',
 help='''FASTA file to filter, can be compressed''')
 
-parser.add_argument('--min_gap', metavar = '<INT>',
-help="""Minimum length of consecutive N's to consider a gap""")
+parser.add_argument('--min_gap', metavar = '<INT>', default=10, type=int,
+help="""Minimum length of consecutive N's to consider a gap and create a scaffold""")
 
 parser.add_argument('--log_file', metavar = '<FILE>',
 default='./basic_fasta_stats.log',
