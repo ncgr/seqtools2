@@ -5,35 +5,56 @@ import sys
 import gzip
 import errno
 
+
+def check_stdin(handle):
+    '''Check STDIN using select'''
+    if select.select([handle,], [], [], 0.0)[0]:  # use select to check STDIN
+        return True  # if True return True
+    return False
+
+
 def create_directories(dirpath):
     '''make directory path'''
     try:
         os.makedirs(dirpath)
     except OSError as e:
-        if e.errno != errno.EEXIST:
+        if e.errno != errno.EEXIST:  # ignore if error is exists else raise
             raise
 
 
 def return_filehandle(open_me):
     '''get me a filehandle, common compression or text'''
     magic_dict = {
-                  b'\x1f\x8b\x08': 'gz'
+                  b'\x1f\x8b\x08': 'gz'  # only one supported right now
 #                  '\x42\x5a\x68': 'bz2',
 #                  '\x50\x4b\x03\x04': 'zip'
                  }
     max_bytes = max(len(t) for t in magic_dict)
-    with open(open_me, 'rb') as f:
+    with open(open_me, 'rb') as f:  # get read and binary fixes python3 issues
         s = f.read(max_bytes)
     for m in magic_dict:
         if s.startswith(m):
-            t = magic_dict[m]
+            t = magic_dict[m]  # get type
             if t == 'gz':
-                return gzip.open(open_me, 'rt')
+                return gzip.open(open_me, 'rt')  # return handle
 #            elif t == 'bz2':
 #                return bz2.open(open_me)
 #            elif t == 'zip':
 #                return zipfile.open(open_me)
-    return open(open_me)
+    return open(open_me)  # return normal handle if not compressed
+
+
+def load_targets_file(targets_file):
+    '''Load targets_file into targets dict and return dict'''
+    fh = return_filehandle(targets_file)
+    targets = {}  # targets dict to return
+    with fh as topen:
+        for line in topen:
+            line = line.rstrip()
+            if not line or line.startswith('#'):  # skip blank and comments
+                continue
+            targets[line] = 1  # store targets could maybe use a set here
+    return targets
 
 
 if __name__ == '__main__':

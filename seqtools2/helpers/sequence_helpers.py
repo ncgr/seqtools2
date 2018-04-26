@@ -6,10 +6,18 @@ import select
 from Bio import SeqIO
 
 
-def check_stdin(handle):
-    '''Check STDIN using select'''
-    if select.select([handle,], [], [], 0.0)[0]:  # use select to check STDIN
-        return True  # if True return True
+def check_sequence_length(seq, length, reverse):
+    '''Accepts a string record and checks to see if it returns true or false
+       
+       based on length and reverse
+    '''
+    if reverse:  # make less than
+        if len(seq) <= length:
+            return True
+        else:
+            return False
+    if len(seq) >= length:  # normal >= check
+        return True
     return False
 
 
