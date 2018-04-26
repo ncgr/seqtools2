@@ -6,7 +6,7 @@ import argparse
 import logging
 from signal import signal, SIGPIPE, SIG_DFL
 from helpers.file_helpers import load_targets_file, return_filehandle
-from helpers.sequence_helpers import get_seqio_record
+from helpers.sequence_helpers import get_seqio_record, check_sequence_id
 
 signal(SIGPIPE, SIG_DFL)
 
@@ -27,6 +27,9 @@ help='''FASTA file to filter, can be compressed''')
 
 parser.add_argument('--targets', metavar='<targets.txt>', required=True,
 help='''Targets file, one per line''')
+
+parser.add_argument('--reverse', action='store_true',
+help='''Reverses target behavior.  Ignore sequences in targets.txt''')
 
 parser.add_argument('--log_file', metavar = '<FILE>',
 default='./get_fasta_by_id.log',
@@ -51,7 +54,7 @@ logger = logging.getLogger('get_fasta_by_id')
 logger.addHandler(log_handler)
 
 
-def get_fasta_by_id(fasta, targets_file):
+def get_fasta_by_id(fasta, targets_file, reverse):
     '''Get IDs from targets_file and return FASTA records from fasta
 
        that match the loaded IDs
@@ -62,21 +65,22 @@ def get_fasta_by_id(fasta, targets_file):
     if not fasta:  # Check STDIN
         logger.info('Parsing STDIN...  Checking for IDs...')
         for record in get_seqio_record(seqio_in):  # get SeqIO record
-            if record.id in targets:  # check length
+            if check_sequence_id(record.id, targets, reverse):  # check
                 print('>{}\n{}'.format(record.description, record.seq))
     else:  # Check FASTA
         logger.info('Parsing FASTA file...  Checking for IDs...')
         fh = return_filehandle(fasta)
         for record in get_seqio_record(fh):  # Get SeqIO record
-            if record.id in targets:  # check length
+            if check_sequence_id(record.id, targets, reverse):  # check
                 print('>{}\n{}'.format(record.description, record.seq))
 
 
 if __name__ == '__main__':
     fasta = args.fasta
     targets = args.targets
+    reverse = args.reverse
     if fasta:
         fasta = os.path.abspath(fasta)
     if targets:
         targets = os.path.abspath(targets)
-    get_fasta_by_id(fasta, targets)
+    get_fasta_by_id(fasta, targets, reverse)
