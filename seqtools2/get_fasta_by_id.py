@@ -6,7 +6,7 @@ import argparse
 import logging
 from signal import signal, SIGPIPE, SIG_DFL
 from helpers.file_helpers import load_targets_file, return_filehandle
-from helpers.sequence_helpers import get_seqio_record, check_sequence_id
+from helpers.sequence_helpers import get_seqio_fasta_record, check_sequence_id
 
 signal(SIGPIPE, SIG_DFL)
 
@@ -64,13 +64,13 @@ def get_fasta_by_id(fasta, targets_file, reverse):
     targets = load_targets_file(targets_file)
     if not fasta:  # Check STDIN
         logger.info('Parsing STDIN...  Checking for IDs...')
-        for record in get_seqio_record(seqio_in):  # get SeqIO record
+        for record in get_seqio_fasta_record(seqio_in):  # get SeqIO record
             if check_sequence_id(record.id, targets, reverse):  # check
                 print('>{}\n{}'.format(record.description, record.seq))
     else:  # Check FASTA
         logger.info('Parsing FASTA file...  Checking for IDs...')
         fh = return_filehandle(fasta)
-        for record in get_seqio_record(fh):  # Get SeqIO record
+        for record in get_seqio_fasta_record(fh):  # Get SeqIO record
             if check_sequence_id(record.id, targets, reverse):  # check
                 print('>{}\n{}'.format(record.description, record.seq))
 

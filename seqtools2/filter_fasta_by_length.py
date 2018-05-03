@@ -6,7 +6,7 @@ import argparse
 import logging
 from signal import signal, SIGPIPE, SIG_DFL
 from helpers.file_helpers import return_filehandle
-from helpers.sequence_helpers import get_seqio_record, check_sequence_length
+from helpers.sequence_helpers import get_seqio_fasta_record, check_sequence_length
 
 signal(SIGPIPE, SIG_DFL)
 
@@ -64,13 +64,13 @@ def filter_fasta_by_length(fasta, length, reverse):
     fh = ''
     if not fasta:  # Check STDIN
         logger.info('Parsing STDIN...  Checking Sequence Lengths...')
-        for record in get_seqio_record(seqio_in):  # get SeqIO record
+        for record in get_seqio_fasta_record(seqio_in):  # get SeqIO record
             if check_sequence_length(record.seq, length, reverse):  #  length
                 print('>{}\n{}'.format(record.description, record.seq))
     else:  # Check FASTA
         logger.info('Parsing FASTA file...  Checking Sequence Lengths...')
         fh = return_filehandle(fasta)
-        for record in get_seqio_record(fh):  # Get SeqIO record
+        for record in get_seqio_fasta_record(fh):  # Get SeqIO record
             if check_sequence_length(record.seq, length, reverse):  # length
                 print('>{}\n{}'.format(record.description, record.seq))
             

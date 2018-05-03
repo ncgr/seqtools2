@@ -36,13 +36,23 @@ def check_sequence_length(seq, length, reverse):
     return False
 
 
-def get_seqio_record(seq_handle):
-    '''Parses a filehandle seq_handle and yields the formatted records
+def get_seqio_fasta_record(seq_handle):
+    '''Parses a fasta filehandle seq_handle and yields the formatted records
     
        Generator for SeqIO record objects
     '''
     with seq_handle as sopen:
         for record in SeqIO.parse(sopen, 'fasta'):  # iterate with SeqIO
+            yield record  # yield each record as it is iterated
+
+
+def get_seqio_fastq_record(seq_handle):
+    '''Parses a fasta filehandle seq_handle and yields the formatted records
+    
+       Generator for SeqIO record objects
+    '''
+    with seq_handle as sopen:
+        for record in SeqIO.parse(sopen, 'fastq'):  # iterate with SeqIO
             yield record  # yield each record as it is iterated
 
 

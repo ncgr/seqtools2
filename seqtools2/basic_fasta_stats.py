@@ -6,7 +6,7 @@ import argparse
 import logging
 from time import sleep
 from signal import signal, SIGPIPE, SIG_DFL
-from helpers.sequence_helpers import get_seqio_record
+from helpers.sequence_helpers import get_seqio_fasta_record
 from helpers.file_helpers import return_filehandle, check_stdin
 
 signal(SIGPIPE, SIG_DFL) 
@@ -132,7 +132,7 @@ def basic_fasta_stats(fasta):
     slen = 0
     length = 0
     i = 0
-    for record in get_seqio_record(fasta):  # get records from SeqIO
+    for record in get_seqio_fasta_record(fasta):  # get records from SeqIO
         metrics['records'] += 1  # increment total
         seq = record.seq
         if seq:
