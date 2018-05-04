@@ -5,33 +5,35 @@ import sys
 import argparse
 import logging
 from signal import signal, SIGPIPE, SIG_DFL
-from helpers.file_helpers import return_filehandle
-from helpers.sequence_helpers import get_seqio_fastq_record
+from helpers.file_helpers import load_targets_file, return_filehandle
+from helpers.sequence_helpers import get_seqio_fastq_record, check_sequence_id
 
 signal(SIGPIPE, SIG_DFL)
 
 parser = argparse.ArgumentParser(description='''
 
-        Subset FASTQ Files.
+        Get a subset of FASTQ sequences from a file by id
 
-        cat input*.fastq | subset_fastq.py
+        cat input.fastq | get_fastq_by_id.py
 
         or 
 
-        subset_fastq.py --fastq input.fastq
+        get_fastq_by_id.py --fastq input.fastq --targets targets.txt
 
 ''', formatter_class=argparse.RawTextHelpFormatter)
 
-parser.add_argument('--fastq', metavar = '</path/to/my/fastq.fq>',
-help='''FASTQ file to subset, can be compressed''')
+parser.add_argument('--fastq', metavar = '</path/to/my/fastq.fa>',
+help='''fastq file to filter, can be compressed''')
 
-parser.add_argument('--subset', metavar = '<INT>', type=int,
-help='''Take every N reads (default:10)''',
-default=10)
+parser.add_argument('--targets', metavar='<targets.txt>', required=True,
+help='''Targets file, one per line''')
+
+parser.add_argument('--reverse', action='store_true',
+help='''Reverses target behavior.  Ignore sequences in targets.txt''')
 
 parser.add_argument('--log_file', metavar = '<FILE>',
-default='./subset_fastq.log',
-help='''File to write log to.  (default:./subset_fastq.log)''')
+default='./get_fastq_by_id.log',
+help='''File to write log to.  (default:./get_fastq_by_id.log)''')
 
 parser.add_argument('--log_level', metavar = '<LOGLEVEL>', default='INFO',
 help='''Log level: DEBUG, INFO, WARNING, ERROR, CRITICAL (default:INFO)''')
@@ -48,45 +50,39 @@ logging.basicConfig(format=msg_format, datefmt='%m-%d %H:%M',
 log_handler = logging.FileHandler(log_file, mode='w')
 formatter = logging.Formatter(msg_format)
 log_handler.setFormatter(formatter)
-logger = logging.getLogger('subset_fastq')
+logger = logging.getLogger('get_fastq_by_id')
 logger.addHandler(log_handler)
 
 
-def subset_fastq(fastq, subset):
-    '''Subset FASTQ file.  Pick 1/subset reads.
+def get_fastq_by_id(fastq, targets_file, reverse):
+    '''Get IDs from targets_file and return fastq records from fastq
 
-       If reverse, fasta <= length
+       that match the loaded IDs
     '''
     seqio_in = sys.stdin
     fh = ''
-    count = 0
-    total = 0
+    targets = load_targets_file(targets_file)
     if not fastq:  # Check STDIN
-        logger.info('Parsing STDIN... Output every {} reads...'.format(subset))
+        logger.info('Parsing STDIN...  Checking for IDs...')
         for record in get_seqio_fastq_record(seqio_in):  # get SeqIO record
-            count += 1
-            if count == subset:
-                count = 0
-                total += 1
+            if check_sequence_id(record.id, targets, reverse):  # check
                 sys.stdout.write(record.format('fastq'))
                 sys.stdout.flush()
-    else:  # Check FASTA
-        logger.info('Parsing FASTQ file... Output every {} reads...'.format(
-                                                                      subset))
+    else:  # Check fastq
+        logger.info('Parsing fastq file...  Checking for IDs...')
         fh = return_filehandle(fastq)
         for record in get_seqio_fastq_record(fh):  # Get SeqIO record
-            count += 1
-            if count == subset:
-                count = 0
-                total += 1
+            if check_sequence_id(record.id, targets, reverse):  # check
                 sys.stdout.write(record.format('fastq'))
                 sys.stdout.flush()
-    logger.info('Output {} reads'.format(total))
-            
+
 
 if __name__ == '__main__':
     fastq = args.fastq
+    targets = args.targets
+    reverse = args.reverse
     if fastq:
         fastq = os.path.abspath(fastq)
-    subset = args.subset
-    subset_fastq(fastq, subset)
+    if targets:
+        targets = os.path.abspath(targets)
+    get_fastq_by_id(fastq, targets, reverse)
