@@ -22,6 +22,16 @@ def create_directories(dirpath):
             raise
 
 
+def return_output_handle(write_me, gzipped):
+    '''Returns an open file handle to write.  
+    
+       If gzipped=True returns gzip handle
+    '''
+    if gzipped:
+        return gzip.open(write_me, 'wb')  # return comrpessed handle
+    return open(write_me, 'w')
+
+
 def return_filehandle(open_me):
     '''get me a filehandle, common compression or text'''
     magic_dict = {
