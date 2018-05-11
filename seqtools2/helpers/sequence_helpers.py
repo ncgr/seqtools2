@@ -56,6 +56,16 @@ def get_seqio_fastq_record(seq_handle):
             yield record  # yield each record as it is iterated
 
 
+def get_seqio_fastx_record(seq_handle, file_type):
+    '''Takes file type and the sequence filehandle
+    
+       Generator for general SeqIO records lets Bio handle exceptions
+    '''
+    with seq_handle as sopen:
+        for record in SeqIO.parse(sopen, file_type):
+            yield record  # yeild SerIO record object.  Its a set.
+
+
 if __name__ == '__main__':
     print('Please import!')
     sys.exit(0)

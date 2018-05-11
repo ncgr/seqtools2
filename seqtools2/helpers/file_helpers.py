@@ -4,6 +4,7 @@ import os
 import sys
 import gzip
 import errno
+import re
 
 
 def check_stdin(handle):
@@ -20,6 +21,23 @@ def create_directories(dirpath):
     except OSError as e:
         if e.errno != errno.EEXIST:  # ignore if error is exists else raise
             raise
+
+
+def check_file_type(check_me):
+    '''Checks a files type by splitting on "." and getting the last element'''
+    suffix = check_me.split('.')[-1].lower()  # get suffix
+    fasta_check = re.compile('fa|fasta|fna')
+    fastq_check = re.compile('fq|fastq')
+    compression_check = re.compile('gz|bgz|xz|zip|bzip')
+    if not suffix:
+        return False  # no file type
+    if compression_check.match(suffix):
+        suffix = check_me.split('.')[-2].lower()
+    if fastq_check.match(suffix):
+        suffix = 'fastq'  # set standard
+    elif fasta_check.match(suffix):
+        suffix = 'fasta'  # set standard
+    return suffix
 
 
 def return_output_handle(write_me, gzipped):
