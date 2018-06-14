@@ -1,0 +1,19 @@
+#!/usr/bin/env python
+
+import os
+import sys
+import argparse
+import logging
+from signal import signal, SIGPIPE, SIG_DFL
+
+signal(SIGPIPE, SIG_DFL) 
+
+
+if __name__ == '__main__':
+    tool = sys.argv[1]
+    print(tool)
+    if tool == 'basic_fasta_stats':
+        sys.argv = ['basic_fasta_stats'] + sys.argv[2:]
+        import basic_fasta_stats
+        basic_fasta_stats.logger.info('test me')
+        basic_fasta_stats.main()

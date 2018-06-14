@@ -198,7 +198,8 @@ def basic_fasta_stats(fasta):
     return metrics
 
 
-if __name__ == '__main__':
+def main():
+    '''allows main to be called from an import'''
     fasta = args.fasta
     if fasta and check_stdin(sys.stdin):
         logger.error('Can only provide STDIN or FASTA file, not both!')
@@ -206,3 +207,6 @@ if __name__ == '__main__':
     if fasta:
         fasta = os.path.abspath(fasta)
     print(basic_fasta_stats(fasta))
+
+if __name__ == '__main__':
+    main()
