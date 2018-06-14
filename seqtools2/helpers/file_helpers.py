@@ -5,6 +5,7 @@ import sys
 import gzip
 import errno
 import re
+import select
 
 
 def check_stdin(handle):
