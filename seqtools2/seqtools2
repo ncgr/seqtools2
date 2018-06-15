@@ -4,16 +4,41 @@ import os
 import sys
 import argparse
 import logging
+import click
+import logging
 from signal import signal, SIGPIPE, SIG_DFL
 
 signal(SIGPIPE, SIG_DFL) 
 
 
-if __name__ == '__main__':
-    tool = sys.argv[1]
-    print(tool)
+def run_tools():
+    '''Seqtools2: Sequence Manipulation and Statistics
+
+       USAGE: seqtools2 <TOOL>
+
+       Current Tools:
+
+        basic_fasta_stats
+        chunk_fasta
+        chunk_fastq
+        detect_chimeric_alignments
+        fastx_converter
+        filter_fasta_by_length
+        get_fasta_by_id
+        get_fastq_by_id
+        subset_fastq
+
+       Please run `seqtools2 <TOOL> --help` for individual usage
+    '''
+    if not len(sys.argv) > 1:
+        print(run_tools.__doc__)
+        sys.exit(1)
+    tool = sys.argv[1]  # get tool
     if tool == 'basic_fasta_stats':
         sys.argv = ['basic_fasta_stats'] + sys.argv[2:]
-        import basic_fasta_stats
-        basic_fasta_stats.logger.info('test me')
+        import tools.basic_fasta_stats as basic_fasta_stats
         basic_fasta_stats.main()
+
+
+if __name__ == '__main__':
+    run_tools() 

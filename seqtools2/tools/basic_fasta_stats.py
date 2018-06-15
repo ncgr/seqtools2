@@ -4,6 +4,7 @@ import os
 import sys
 import argparse
 import logging
+import click
 from time import sleep
 from signal import signal, SIGPIPE, SIG_DFL
 from helpers.sequence_helpers import get_seqio_fasta_record
@@ -11,45 +12,6 @@ from helpers.file_helpers import return_filehandle, check_stdin
 
 signal(SIGPIPE, SIG_DFL) 
 
-parser = argparse.ArgumentParser(description='''
-
-        Get Basic Contiguity, Continuity, and Sequence Content Stats
-
-        cat input.fasta | basic_fasta_stats.py
-
-        or 
-
-        basic_fasta_stats.py --fasta input.fasta
-
-''', formatter_class=argparse.RawTextHelpFormatter)
-
-parser.add_argument('--fasta', metavar = '</path/to/my/fasta.fa>',
-help='''FASTA file to filter, can be compressed''')
-
-parser.add_argument('--min_gap', metavar = '<INT>', default=10, type=int,
-help="""Minimum length of consecutive N's to consider a gap and create a scaffold (default: 10)""")
-
-parser.add_argument('--log_file', metavar = '<FILE>',
-default='./basic_fasta_stats.log',
-help='''File to write log to.  (default:./basic_fasta_stats.log)''')
-
-parser.add_argument('--log_level', metavar = '<LOGLEVEL>', default='INFO',
-help='''Log level: DEBUG, INFO, WARNING, ERROR, CRITICAL (default:INFO)''')
-
-parser._optionals.title = "Program Options"
-args = parser.parse_args()
-
-log_file = args.log_file
-
-log_level = getattr(logging, args.log_level.upper(), logging.INFO)
-msg_format = '%(asctime)s|%(name)s|[%(levelname)s]: %(message)s'
-logging.basicConfig(format=msg_format, datefmt='%m-%d %H:%M',
-                    level=log_level)
-log_handler = logging.FileHandler(log_file, mode='w')
-formatter = logging.Formatter(msg_format)
-log_handler.setFormatter(formatter)
-logger = logging.getLogger('basic_fasta_stats')
-logger.addHandler(log_handler)
 
 
 def get_N50(lengths, total):
@@ -102,7 +64,7 @@ def compile_metrics(metrics, lengths, bases):
     metrics['N50'] = get_N50(lengths['total'], bases['total'])  # N50 of all
 
 
-def basic_fasta_stats(fasta):
+def basic_fasta_stats(fasta, min_gap):
     '''Main method for stats calculation.  Creates data structures
 
        and controls workflow
@@ -122,7 +84,6 @@ def basic_fasta_stats(fasta):
                'maxcontig' : 0, 'mincontig' : 0,
                'contigbases' : 0, 'scaffoldbases' : 0, 'gapbases' : 0,
                'allbases' : 0, 'pgc' : 0}
-    min_gap = args.min_gap  # default 10
     lengths = {'scaffolds' : [], 'gaps' : [], 'contigs' : [], 'total' : []}
     scheck = 0
     gcheck = 0
@@ -198,15 +159,31 @@ def basic_fasta_stats(fasta):
     return metrics
 
 
-def main():
-    '''allows main to be called from an import'''
-    fasta = args.fasta
+@click.command()
+@click.option('--fasta', help='''FASTA file to filter, can be compressed''')
+@click.option('--min_gap', default=10, help="""Minimum length of consecutive N's to consider a gap and create a scaffold (default: 10)""")
+@click.option('--log_file', default='./basic_fasta_stats.log',
+help='''File to write log to.  (default:./basic_fasta_stats.log)''')
+@click.option('--log_level', default='INFO',
+help='''Log level: DEBUG, INFO, WARNING, ERROR, CRITICAL (default:INFO)''')
+def main(fasta, min_gap, log_file, log_level):
+    '''Basic FASTA Stats Generation.  MORE DOC COMING'''
+    log_level = getattr(logging, log_level.upper(), logging.INFO)
+    msg_format = '%(asctime)s|%(name)s|[%(levelname)s]: %(message)s'
+    logging.basicConfig(format=msg_format, datefmt='%m-%d %H:%M',
+                        level=log_level)
+    log_handler = logging.FileHandler(log_file, mode='w')
+    formatter = logging.Formatter(msg_format)
+    log_handler.setFormatter(formatter)
+    logger = logging.getLogger('basic_fasta_stats')
+    logger.addHandler(log_handler)
     if fasta and check_stdin(sys.stdin):
         logger.error('Can only provide STDIN or FASTA file, not both!')
         sys.exit(1)
     if fasta:
         fasta = os.path.abspath(fasta)
-    print(basic_fasta_stats(fasta))
+    print(basic_fasta_stats(fasta, min_gap))
+
 
 if __name__ == '__main__':
     main()
