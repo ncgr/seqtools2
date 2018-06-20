@@ -2,7 +2,7 @@
 
 import os
 import sys
-import argparse
+import click
 import logging
 from signal import signal, SIGPIPE, SIG_DFL
 from helpers.file_helpers import (return_filehandle, create_directories, 
@@ -10,57 +10,6 @@ from helpers.file_helpers import (return_filehandle, create_directories,
 from helpers.sequence_helpers import get_seqio_fasta_record
 
 signal(SIGPIPE, SIG_DFL)
-
-parser = argparse.ArgumentParser(description='''
-
-        Chunk FASTA Files.
-
-        cat input*.fasta | chunk_fasta.py
-
-        or 
-
-        chunk_fasta.py --fasta input.fasta
-
-''', formatter_class=argparse.RawTextHelpFormatter)
-
-parser.add_argument('--fasta', metavar = '</path/to/my/fasta.fa>',
-help='''FASTA file to chunk, can be compressed''')
-
-parser.add_argument('--chunk_size', metavar = '<INT>', type=int,
-help='''Write N reads to file (default:1000)''',
-default=1000)
-
-parser.add_argument('--chunk_bytes', metavar = '<INT>', type=int,
-help='''Try to write N sequence bytes to file.  Keeps sequence intact''')
-
-parser.add_argument('--chunk_dir', metavar = '</path/to/chunks>',
-help='''Directory to write chunks in (default:./chunks)''',
-default='./chunks')
-
-parser.add_argument('--gzip_output', action='store_true',
-help='''Gzip output files''')
-
-parser.add_argument('--log_file', metavar = '<FILE>',
-default='./chunk_fasta.log',
-help='''File to write log to.  (default:./chunk_fasta.log)''')
-
-parser.add_argument('--log_level', metavar = '<LOGLEVEL>', default='INFO',
-help='''Log level: DEBUG, INFO, WARNING, ERROR, CRITICAL (default:INFO)''')
-
-parser._optionals.title = "Program Options"
-args = parser.parse_args()
-
-log_file = args.log_file
-
-log_level = getattr(logging, args.log_level.upper(), logging.INFO)
-msg_format = '%(asctime)s|%(name)s|[%(levelname)s]: %(message)s'
-logging.basicConfig(format=msg_format, datefmt='%m-%d %H:%M',
-                    level=log_level)
-log_handler = logging.FileHandler(log_file, mode='w')
-formatter = logging.Formatter(msg_format)
-log_handler.setFormatter(formatter)
-logger = logging.getLogger('chunk_fasta')
-logger.addHandler(log_handler)
 
 
 def get_chunk(chunks_dir, total_files, gzip_me):
@@ -100,9 +49,10 @@ def process_filehandle(fh, chunks, chunks_dir, gzip_me, byte_chunks):
             continue  # dont write sequence twice
         write_chunk(record, chunk, gzip_me)
     chunk.close()  # close last instance of chunk
-    logger.info('Output {} reads in {} files {} at a time'.format(total_reads,
-                                                                  total_files,
-                                                                  chunks))
+    result_str = 'Output {} reads in {} files {} at a time'.format(total_reads,
+                                                                   total_files,
+                                                                   chunks)
+    return result_str
 
 
 def chunk_fasta(fasta, chunks, chunks_dir, gzip_me, byte_chunks):
@@ -115,24 +65,58 @@ def chunk_fasta(fasta, chunks, chunks_dir, gzip_me, byte_chunks):
     seqio_in = sys.stdin
     fh = ''
     if not fasta:  # Check STDIN
-        logger.info('Parsing STDIN... Chunking reads in {}s...'.format(chunks))
-        process_filehandle(seqio_in, chunks, chunks_dir, gzip_me, byte_chunks)
+        return process_filehandle(seqio_in, chunks, chunks_dir, 
+                                  gzip_me, byte_chunks)
     else:  # Check FASTA
-        logger.info('Parsing FASTA file... Chunking reads in {}s...'.format(
-                                                                      chunks))
         fh = return_filehandle(fasta)
-        process_filehandle(fh, chunks, chunks_dir, gzip_me, byte_chunks)
+        return process_filehandle(fh, chunks, chunks_dir, 
+                                  gzip_me, byte_chunks)
 
 
-if __name__ == '__main__':
-    fasta = args.fasta
-    chunk_dir = os.path.abspath(args.chunk_dir)
-    gzip_me = args.gzip_output
+@click.command()
+@click.option('--fasta', help='''FASTA file to chunk, can be compressed''')
+@click.option('--chunk_size', help='''Write N reads to file (default:1000)''',
+              default=1000)
+@click.option('--chunk_bytes', 
+      help='''Try to write N sequence bytes to file.  Keeps sequence intact''')
+@click.option('--chunk_dir', 
+              help='''Directory to write chunks in (default:./chunks)''',
+              default='./chunks')
+@click.option('--gzip_output', is_flag=True,
+              help='''Gzip output files''')
+@click.option('--log_file', default='./chunk_fasta.log',
+              help='''File to write log to.  (default:./chunk_fasta.log)''')
+@click.option('--log_level', default='INFO',
+    help='''Log level: DEBUG, INFO, WARNING, ERROR, CRITICAL (default:INFO)''')
+def main(fasta, chunk_dir, chunk_size, gzip_output, 
+         chunk_bytes, log_file, log_level):
+    '''Chunk FASTA Files.
+
+         cat input*.fasta | chunk_fasta.py
+
+         or
+
+         chunk_fasta.py --fasta input.fasta
+    '''
+    log_level = getattr(logging, log_level.upper(), logging.INFO)
+    msg_format = '%(asctime)s|%(name)s|[%(levelname)s]: %(message)s'
+    logging.basicConfig(format=msg_format, datefmt='%m-%d %H:%M',
+                        level=log_level)
+    log_handler = logging.FileHandler(log_file, mode='w')
+    formatter = logging.Formatter(msg_format)
+    log_handler.setFormatter(formatter)
+    logger = logging.getLogger('chunk_fastq')
+    logger.addHandler(log_handler)
     byte_chunks = False
     if fasta:
         fasta = os.path.abspath(fasta)
-    chunks = args.chunk_size
-    if args.chunk_bytes:
-        chunks = args.chunk_bytes
+    if chunk_bytes:
+        chunk_size = chunk_bytes
         byte_chunks = True
-    chunk_fasta(fasta, chunks, chunk_dir, gzip_me, byte_chunks)
+    result = chunk_fasta(fasta, chunk_size, chunk_dir, 
+                         gzip_output, byte_chunks)
+    logger.info(result)
+
+
+if __name__ == '__main__':
+    main()
