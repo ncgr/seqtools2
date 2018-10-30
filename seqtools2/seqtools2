@@ -19,6 +19,7 @@ def run_tools():
        Current Tools:
 
         basic_fasta_stats
+        format_fasta
         chunk_fasta
         chunk_fastq
         detect_chimeric_alignments
@@ -41,6 +42,9 @@ def run_tools():
     if tool == 'basic_fasta_stats':
         from tools import basic_fasta_stats
         basic_fasta_stats.main()
+    if tool == 'format_fasta':
+        from tools import format_fasta
+        format_fasta.main()
     if tool == 'chunk_fastq':
         from tools import chunk_fastq
         chunk_fastq.main()
