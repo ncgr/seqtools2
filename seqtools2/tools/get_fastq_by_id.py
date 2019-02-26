@@ -11,6 +11,12 @@ from helpers.sequence_helpers import get_seqio_fastq_record, check_sequence_id
 signal(SIGPIPE, SIG_DFL)
 
 
+def print_record(record):
+    '''Formatter for comrpessed and text printing'''
+    output = record.format('fastq')
+    print(output)
+
+
 def get_fastq_by_id(fastq, targets_file, reverse):
     '''Get IDs from targets_file and return FASTQ records from fastq
 
@@ -22,12 +28,14 @@ def get_fastq_by_id(fastq, targets_file, reverse):
     if not fastq:  # Check STDIN
         for record in get_seqio_fastq_record(seqio_in):  # get SeqIO record
             if check_sequence_id(record.id, targets, reverse):  # check
-                print('>{}\n{}'.format(record.description, record.seq))
+                sys.stdout.write(record)
+                sys.stdout.flush()
     else:  # Check FASTQ
         fh = return_filehandle(fastq)
         for record in get_seqio_fastq_record(fh):  # Get SeqIO record
             if check_sequence_id(record.id, targets, reverse):  # check
-                print('>{}\n{}'.format(record.description, record.seq))
+                sys.stdout.write(record)
+                sys.stdout.flush()
 
 
 @click.command()

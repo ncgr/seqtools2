@@ -31,7 +31,7 @@ def write_chunk(record, chunk, gzip_me):
 def process_filehandle(fh, chunks, chunks_dir, gzip_me, byte_chunks):
     count = 0
     total_reads = 0
-    total_files = 1
+    total_files = 0
     create_directories(os.path.abspath(chunks_dir))  # create chunks directory
     chunk = get_chunk(chunks_dir, total_files, gzip_me)
     for record in get_seqio_fasta_record(fh):  # get SeqIO record
@@ -40,12 +40,12 @@ def process_filehandle(fh, chunks, chunks_dir, gzip_me, byte_chunks):
             count += len(record.seq)  # bytes of current sequence
         else:
             count += 1
-        if count > chunks:  # open new file close old file
+        if count >= chunks:  # open new file close old file
             count = 0
-            total_files += 1
             chunk.close()
             chunk = get_chunk(chunks_dir, total_files, gzip_me)
             write_chunk(record, chunk, gzip_me)
+            total_files += 1
             continue  # dont write sequence twice
         write_chunk(record, chunk, gzip_me)
     chunk.close()  # close last instance of chunk
@@ -111,7 +111,7 @@ def main(fasta, chunk_dir, chunk_size, gzip_output,
     if fasta:
         fasta = os.path.abspath(fasta)
     if chunk_bytes:
-        chunk_size = chunk_bytes
+        chunk_size = int(chunk_bytes)
         byte_chunks = True
     result = chunk_fasta(fasta, chunk_size, chunk_dir, 
                          gzip_output, byte_chunks)
