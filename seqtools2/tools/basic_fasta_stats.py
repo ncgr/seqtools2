@@ -55,7 +55,7 @@ def get_mean(lengths):
         number += 1
     if number:
         mean = total_length/number
-        return mean
+        return round(mean)
     return 0  # if empty list
 
 
@@ -64,7 +64,7 @@ def get_gc(gc, total):
     if not total or not gc:
         return 0
     pgc = float(gc)/int(total)  # get percent GC
-    return pgc
+    return round(pgc)
 
 
 def compile_metrics(metrics, lengths, bases):
@@ -204,7 +204,7 @@ def basic_fasta_stats(fasta, min_gap, classic):
         i = 0
         pos = 0
     compile_metrics(metrics, lengths, bases)
-    metrics['pgc'] = (float(bases['G'] + bases['C'])/float(bases['total']))*100
+    metrics['pgc'] = round((float(bases['G'] + bases['C'])/float(bases['total']))*100)
     if classic:
         metrics['scaffoldN50'] = metrics['N50']
         metrics['scaffolds'] = metrics['records']
