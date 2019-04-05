@@ -52,7 +52,7 @@ def fastx_converter(input_file, input_type, output_type, quality):
 @click.option('--input_type', required=True,
               help='''Input file type.  fasta or fastq''')
 @click.option('--output_quality', default=40,
-   help='''Quality to assign if converting from fastq to fasta (default:40)''')
+   help='''Quality to assign if converting from fasta to fastq (default:40)''')
 @click.option('--log_file', default='./fastx_converter.log',
              help='''File to write log to.  (default:./fastx_converter.log)''')
 @click.option('--log_level', default='INFO',
@@ -94,7 +94,7 @@ def main(input_file, input_type, output_quality, log_file, log_level):
                                                              input_type,
                                                              input_type_check))
             sys.exit(1)
-    fastx_converter(input_file, input_type, output_type, quality)
+    fastx_converter(input_file, input_type, output_type, output_quality)
 
 
 if __name__ == '__main__':
