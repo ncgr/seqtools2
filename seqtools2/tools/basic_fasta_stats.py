@@ -5,6 +5,7 @@ import sys
 import click
 import json
 import logging
+from collections import OrderedDict
 from time import sleep
 from signal import signal, SIGPIPE, SIG_DFL
 from .helpers.sequence_helpers import get_seqio_fasta_record
@@ -212,28 +213,27 @@ def basic_fasta_stats(fasta, min_gap, classic):
         metrics['scaffoldbases'] = metrics['allbases']
         metrics['maxscaffold'] = metrics['maxlen']
         metrics['minscaffold'] = metrics['minlen']
-        classic_metrics = {}
-        classic_metrics['Contigs'] = metrics['contigs']
-        classic_metrics['Max Contig'] = metrics['maxcontig']
-        classic_metrics['Min Contig'] = metrics['mincontig']
-        classic_metrics['Mean Contig'] = metrics['meancontig']
-        classic_metrics['Contig N50'] = metrics['contigN50']
-        classic_metrics['Contig N90'] = metrics['contigN90']
-        classic_metrics['Total Contig Length'] = metrics['contigbases']
-        classic_metrics['Assembly GC'] = metrics['pgc']
-        classic_metrics['Scaffolds'] = metrics['scaffolds']
-        classic_metrics['Max Scaffold'] = metrics['maxscaffold']
-        classic_metrics['Min Scaffold'] = metrics['minscaffold']
-        classic_metrics['Mean Scaffold'] = metrics['meanscaffold']
-        classic_metrics['Scaffold N50'] = metrics['scaffoldN50']
-        classic_metrics['Scaffold N90'] = metrics['scaffoldN90']
-        classic_metrics['Total Scaffold Length'] = metrics['scaffoldbases']
-        classic_metrics['Captured Gaps'] = metrics['gaps']
-        classic_metrics['Max Gap'] = metrics['maxgap']
-        classic_metrics['Min Gap'] = metrics['mingap']
-        classic_metrics['Mean Gap'] = metrics['meangap']
-        classic_metrics['Gap N50'] = metrics['gapN50']
-        classic_metrics['Total Gap Length'] = metrics['gapbases']
+        classic_metrics = OrderedDict([('Scaffolds', metrics['scaffolds']),
+                            ('Max Scaffold', metrics['maxscaffold']),
+                            ('Min Scaffold', metrics['minscaffold']),
+                            ('Mean Scaffold', metrics['meanscaffold']),
+                            ('Scaffold N50', metrics['scaffoldN50']),
+                            ('Scaffold N90', metrics['scaffoldN90']),
+                            ('Total Scaffold Length', metrics['scaffoldbases']),
+                            ('Contigs', metrics['contigs']),
+                            ('Max Contig', metrics['maxcontig']),
+                            ('Min Contig', metrics['mincontig']),
+                            ('Mean Contig', metrics['meancontig']),
+                            ('Contig N50', metrics['contigN50']),
+                            ('Contig N90', metrics['contigN90']),
+                            ('Total Contig Length', metrics['contigbases']),
+                            ('Assembly GC', metrics['pgc']),
+                            ('Captured Gaps', metrics['gaps']),
+                            ('Max Gap', metrics['maxgap']),
+                            ('Min Gap', metrics['mingap']),
+                            ('Mean Gap', metrics['meangap']),
+                            ('Gap N50', metrics['gapN50']),
+                            ('Total Gap Length', metrics['gapbases'])])
         return classic_metrics  # return GAEMR like output keys
     return metrics  # standard
 
