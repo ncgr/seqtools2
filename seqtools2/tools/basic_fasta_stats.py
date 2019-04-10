@@ -3,6 +3,7 @@
 import os
 import sys
 import click
+import json
 import logging
 from time import sleep
 from signal import signal, SIGPIPE, SIG_DFL
@@ -261,7 +262,7 @@ def main(fasta, min_gap, classic, log_file, log_level):
         logger.warning('stdin seen with FASTA, will process FASTA')
     if fasta:
         fasta = os.path.abspath(fasta)
-    print(basic_fasta_stats(fasta, min_gap, classic))
+    print(json.dumps(basic_fasta_stats(fasta, min_gap, classic)))
 
 
 if __name__ == '__main__':
