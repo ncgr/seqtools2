@@ -42,11 +42,12 @@ setup(
     entry_points={
         'console_scripts': [NAME + ' = ' + NAME + ':cli']
     },
-    use_scm_version={
-        'version_scheme': 'guess-next-dev',
-        'local_scheme': 'dirty-tag',
-        'write_to': NAME + '/version.py'
-    },
+    version = '0.0.1',
+#    use_scm_version={
+#        'version_scheme': 'guess-next-dev',
+#        'local_scheme': 'dirty-tag',
+#        'write_to': NAME + '/version.py'
+#    },
     extras_require=extras_require,
     tests_require=tests_require,
 )
