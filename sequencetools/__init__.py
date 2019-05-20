@@ -6,6 +6,7 @@ import sys
 import argparse
 import logging
 import click
+from datetime import datetime
 import locale
 from signal import signal, SIGPIPE, SIG_DFL
 from .version import version as VERSION
@@ -26,8 +27,8 @@ AUTHOR = 'Connor Cameron'
 EMAIL = 'ctc@ncgr.org'
 COPYRIGHT = """Copyright (C) 2018, NCGR. All rights reserved.
 """
+PROGRAM_NAME = 'sequencetools'
 PROJECT_HOME = 'https://github.com/ncgr/seqtools2'
-
 DEFAULT_FILE_LOGLEVEL = logging.DEBUG
 DEFAULT_STDERR_LOGLEVEL = logging.INFO
 STARTTIME = datetime.now()
@@ -154,12 +155,12 @@ def cli():
        Please run `seqtools2 <TOOL> --help` for individual usage
     '''
     if not len(sys.argv) > 1:
-        print(run_tools.__doc__)
+        print(cli.__doc__)
         sys.exit(1)
     tool = sys.argv[1].lower()  # get tool
     sys.argv = [tool] + sys.argv[2:]  # make usage for applicaiton correct
     if tool == '--help' or tool =='-h':
-        print(run_tools.__doc__)
+        print(cli.__doc__)
         sys.exit(1)
     if tool == 'basic_fasta_stats':
         from .tools import basic_fasta_stats

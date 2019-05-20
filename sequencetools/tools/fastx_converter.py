@@ -6,8 +6,8 @@ import re
 import click
 import logging
 from signal import signal, SIGPIPE, SIG_DFL
-from helpers.file_helpers import return_filehandle, check_file_type
-from helpers.sequence_helpers import get_seqio_fastx_record
+from ..helpers.file_helpers import return_filehandle, check_file_type
+from ..helpers.sequence_helpers import get_seqio_fastx_record
 
 
 signal(SIGPIPE, SIG_DFL)

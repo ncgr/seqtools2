@@ -8,8 +8,8 @@ import logging
 from collections import OrderedDict
 from time import sleep
 from signal import signal, SIGPIPE, SIG_DFL
-from .helpers.sequence_helpers import get_seqio_fasta_record
-from .helpers.file_helpers import return_filehandle, check_stdin
+from ..helpers.sequence_helpers import get_seqio_fasta_record
+from ..helpers.file_helpers import return_filehandle, check_stdin
 
 signal(SIGPIPE, SIG_DFL) 
 
