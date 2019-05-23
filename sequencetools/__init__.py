@@ -25,7 +25,7 @@ for localename in ['en_US', 'en_US.utf8', 'English_United_States']:
 
 AUTHOR = 'Connor Cameron'
 EMAIL = 'ctc@ncgr.org'
-COPYRIGHT = """Copyright (C) 2018, NCGR. All rights reserved.
+COPYRIGHT = """Copyright (C) 2019, NCGR. All rights reserved.
 """
 PROGRAM_NAME = 'sequencetools'
 PROJECT_HOME = 'https://github.com/ncgr/seqtools2'
@@ -135,24 +135,23 @@ class CleanInfoFormatter(logging.Formatter):
 #    return decorator
 
 def cli():
-    '''Seqtools2: Sequence Manipulation and Statistics
+    '''Sequencetools: FASTX Sequence Manipulation and Statistics
 
-       USAGE: seqtools2 <TOOL>
+       USAGE: sequencetools <TOOL> [options]
 
        Current Tools:
 
-        basic_fasta_stats
-        format_fasta
-        chunk_fasta
-        chunk_fastq
-        detect_chimeric_alignments
-        fastx_converter
-        filter_fasta_by_length
-        get_fasta_by_id
-        get_fastq_by_id
-        subset_fastq
+         basic_fasta_stats
+         format_fasta
+         chunk_fasta
+         chunk_fastq
+         fastx_converter
+         filter_fasta_by_length
+         get_fasta_by_id
+         get_fastq_by_id
+         subset_fastq
 
-       Please run `seqtools2 <TOOL> --help` for individual usage
+       Please run `sequencetools <TOOL> --help` for individual usage
     '''
     if not len(sys.argv) > 1:
         print(cli.__doc__)

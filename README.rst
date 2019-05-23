@@ -10,13 +10,19 @@ In honor of John A. Crow
 
 Current Tools
 -------------
+USAGE: sequencetools <TOOL> [options]
 
-seqtools2/basic_fasta_stats.py
-seqtools2/chunk_fasta.py
-seqtools2/chunk_fastq.py
-seqtools2/detect_chimeric_alignments.py
-seqtools2/fastx_converter.py
-seqtools2/filter_fasta_by_length.py
-seqtools2/get_fasta_by_id.py
-seqtools2/get_fastq_by_id.py
-seqtools2/subset_fastq.py
+Current Tools:
+
+  basic_fasta_stats
+  format_fasta
+  chunk_fasta
+  chunk_fastq
+  fastx_converter
+  filter_fasta_by_length
+  get_fasta_by_id
+  get_fastq_by_id
+  subset_fastq
+
+Please run `sequencetools <TOOL> --help` for individual usage
+    

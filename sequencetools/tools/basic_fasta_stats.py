@@ -241,13 +241,15 @@ def basic_fasta_stats(fasta, min_gap, classic):
 @click.command()
 @click.option('--fasta', help='''FASTA file to filter, can be compressed''')
 @click.option('--classic', is_flag=True,
-         help='''Reverses target behavior.  Ignore sequences in targets.txt''')
+         help='''Outputs Stats with Older GAEMR Like Keys''')
+@click.option('--human_readable', is_flag=True,
+         help='''Outputs Human Readable Stats''')
 @click.option('--min_gap', default=10, help="""Minimum length of consecutive N's to consider a gap and create a scaffold (default: 10)""")
 @click.option('--log_file', default='./basic_fasta_stats.log',
 help='''File to write log to.  (default:./basic_fasta_stats.log)''')
 @click.option('--log_level', default='INFO',
 help='''Log level: DEBUG, INFO, WARNING, ERROR, CRITICAL (default:INFO)''')
-def main(fasta, min_gap, classic, log_file, log_level):
+def main(fasta, min_gap, classic, human_readable, log_file, log_level):
     '''Basic FASTA Stats Generation.  MORE DOC COMING'''
     log_level = getattr(logging, log_level.upper(), logging.INFO)
     msg_format = '%(asctime)s|%(name)s|[%(levelname)s]: %(message)s'
@@ -262,7 +264,12 @@ def main(fasta, min_gap, classic, log_file, log_level):
         logger.warning('stdin seen with FASTA, will process FASTA')
     if fasta:
         fasta = os.path.abspath(fasta)
-    print(json.dumps(basic_fasta_stats(fasta, min_gap, classic)))
+    if human_readable:
+        stats = basic_fasta_stats(fasta, min_gap, classic)
+        for s in stats:
+            print('{}\t{}'.format(s, stats[s]))
+    else:
+        print(json.dumps(basic_fasta_stats(fasta, min_gap, classic)))
 
 
 if __name__ == '__main__':
