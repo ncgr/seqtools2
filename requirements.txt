@@ -1,5 +1,6 @@
-click==6.7
-intervaltree==2.1.0
-numpy==1.16.1
-sortedcontainers==1.5.10
-biopython==1.70
+biopython==1.73
+Click==7.0
+intervaltree==3.0.2
+numpy==1.16.3
+sequencetools==0.0.3
+sortedcontainers==2.1.0
