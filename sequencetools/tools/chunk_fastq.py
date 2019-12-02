@@ -49,8 +49,6 @@ def chunk_fastq(fastq, chunks, chunks_dir, gzip_me):
                 total_files += 1
                 chunk.close()
                 chunk = get_chunk(chunks_dir, total_files, gzip_me)
-                write_chunk(record, chunk, gzip_me)
-                continue  # dont write sequence twice
             write_chunk(record, chunk, gzip_me)
     else:  # Check FASTA
         fh = return_filehandle(fastq)
