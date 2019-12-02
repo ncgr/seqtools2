@@ -45,7 +45,7 @@ def chunk_fastq(fastq, chunks, chunks_dir, gzip_me):
             total_reads += 1
             count += 1
             if count > chunks:  # open new file close old file
-                count = 0
+                count = 1
                 total_files += 1
                 chunk.close()
                 chunk = get_chunk(chunks_dir, total_files, gzip_me)
@@ -58,12 +58,10 @@ def chunk_fastq(fastq, chunks, chunks_dir, gzip_me):
             total_reads += 1
             count += 1
             if count > chunks:  # open new file close old file
-                count = 0
+                count = 1
                 total_files += 1
                 chunk.close()
                 chunk = get_chunk(chunks_dir, total_files, gzip_me)
-                write_chunk(record, chunk, gzip_me)
-                continue  # don't write sequence twice
             write_chunk(record, chunk, gzip_me)
     chunk.close()  # close last instance of chunk
     result_str = 'Output {} reads in {} files {} at a time'.format(total_reads,
