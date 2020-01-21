@@ -150,6 +150,7 @@ def cli():
          get_fasta_by_id
          get_fastq_by_id
          subset_fastq
+         hifi_profiler
 
        Please run `sequencetools <TOOL> --help` for individual usage
     '''
@@ -188,3 +189,6 @@ def cli():
     if tool == 'subset_fastq':
         from .tools import subset_fastq
         subset_fastq.main()
+    if tool == 'hifi_profiler':
+        from .tools import hifi_profiler
+        hifi_profiler.main()

@@ -28,14 +28,12 @@ def get_fastq_by_id(fastq, targets_file, reverse):
     if not fastq:  # Check STDIN
         for record in get_seqio_fastq_record(seqio_in):  # get SeqIO record
             if check_sequence_id(record.id, targets, reverse):  # check
-                sys.stdout.write(record)
-                sys.stdout.flush()
+                print_record(record)
     else:  # Check FASTQ
         fh = return_filehandle(fastq)
         for record in get_seqio_fastq_record(fh):  # Get SeqIO record
             if check_sequence_id(record.id, targets, reverse):  # check
-                sys.stdout.write(record)
-                sys.stdout.flush()
+                print_record(record)
 
 
 @click.command()
