@@ -104,6 +104,8 @@ def compile_metrics(metrics, lengths, bases):
     metrics['maxlen'] = lengths['total'][-1]
     metrics['minlen'] = lengths['total'][0]
     metrics['N50'] = get_N50(lengths['total'], bases['total'])  # N50 of all
+    metrics['N90'] = get_N90(lengths['total'], bases['total'])
+    metrics['record_mean'] = get_mean(lengths['total'])
 
 
 def basic_fasta_stats(fasta, min_gap, classic):
@@ -209,6 +211,7 @@ def basic_fasta_stats(fasta, min_gap, classic):
     metrics['pgc'] = round((float(bases['G'] + bases['C'])/float(bases['total']))*100)
     if classic:
         metrics['scaffoldN50'] = metrics['N50']
+        metrics['scaffoldN90'] = metrics['N90']
         metrics['scaffolds'] = metrics['records']
         metrics['scaffoldbases'] = metrics['allbases']
         metrics['maxscaffold'] = metrics['maxlen']
@@ -216,7 +219,7 @@ def basic_fasta_stats(fasta, min_gap, classic):
         classic_metrics = OrderedDict([('Scaffolds', metrics['scaffolds']),
                             ('Max Scaffold', metrics['maxscaffold']),
                             ('Min Scaffold', metrics['minscaffold']),
-                            ('Mean Scaffold', metrics['meanscaffold']),
+                            ('Mean Scaffold', metrics['record_mean']),
                             ('Scaffold N50', metrics['scaffoldN50']),
                             ('Scaffold N90', metrics['scaffoldN90']),
                             ('Total Scaffold Length', metrics['scaffoldbases']),

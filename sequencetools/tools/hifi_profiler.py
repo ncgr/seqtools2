@@ -2,13 +2,14 @@
 
 import os
 import sys
+import re
 import click
 import json
 import logging
 from collections import OrderedDict
 from time import sleep
 from signal import signal, SIGPIPE, SIG_DFL
-from ..helpers.sequence_helpers import get_seqio_fasta_record
+from ..helpers.sequence_helpers import get_seqio_fastq_record
 from ..helpers.file_helpers import return_filehandle, check_stdin
 
 signal(SIGPIPE, SIG_DFL) 
@@ -39,16 +40,23 @@ def get_gc(gc, total):
     return round(pgc)
 
 
-def compile_metrics(metrics, lengths, bases):
+def compile_metrics(metrics, lengths, bases, bins, passes):
     '''Fill the metrics dictionary with the results from lengths and bases'''
     lengths['total'] = sorted(lengths['total'])
     metrics['allbases'] = bases['total']
     metrics['maxlen'] = lengths['total'][-1]
     metrics['minlen'] = lengths['total'][0]
-    metrics['N50'] = get_N50(lengths['total'], bases['total'])  # N50 of all
+    metrics['mean'] = get_mean(lengths['total'])  # N50 of all
+    metrics['mean_passes'] = get_mean(lengths['passes'])
+    print(bins)
+    print(passes)
+    metrics['length_bins'] = [ (i, bins[i]) for i in sorted(bins.keys(),
+                                                       key=lambda k: int(k)) ]
+    metrics['passes_bins'] = [ (i, passes[i]) for i in sorted(passes.keys(), 
+                                                        key=lambda k: int(k)) ]
 
 
-def hifi_profiler(fastq, bin_size):
+def hifi_profiler(fastq, bin_size, split_passes):
     '''Main method for stats calculation.  Creates data structures
 
        and controls workflow
@@ -57,23 +65,40 @@ def hifi_profiler(fastq, bin_size):
         fastq = sys.stdin
     else:
         fastq = return_filehandle(fastq)
-    bases = {'A' : 0, 'a' : 0, 'C' : 0, 'c' : 0,
-             'T' : 0, 't' : 0, 'G' : 0, 'g' : 0,
-             'N' : 0, 'n' : 0, 'IUPAC' : 0, 'total' : 0}
-    metrics = {'maxlen': 0, 'minlen': 0, 'records' : 0,
-               'allbases' : 0, 'pgc' : 0}
-    lengths = {'total' : []}
+    bases = {'A': 0, 'a': 0, 'C': 0, 'c': 0,
+             'T': 0, 't': 0, 'G': 0, 'g': 0,
+             'N': 0, 'n': 0, 'IUPAC': 0, 'total': 0}
+    metrics = {'maxlen': 0, 'minlen': 0, 'records': 0, 'mean_passes': 0,
+               'mean': 0, 'allbases': 0, 'pgc': 0, 'length_bins': [],
+               'passes_bins': []}
+    lengths = {'total': [], 'passes': []}
     length = 0
+    bins = {}  # for plotting
+    passes = {}
+    get_passes = re.compile('passes=(\d+)')
     for record in get_seqio_fastq_record(fastq):  # get records from SeqIO
         metrics['records'] += 1  # increment total
         seq = record.seq
+        desc = record.description  # get header description to get passes
+        if not desc:
+            sys.stderr.write('NO DESCRIPTION FIELD NOT CALCULATING PASSES!\n')
+        else:
+            my_passes = get_passes.search(desc)
+            my_passes = my_passes.groups(1)[0]
+            lengths['passes'].append(int(my_passes))
+            if my_passes not in passes:
+                passes[my_passes] = 0
+            passes[my_passes] += 1
         if seq:
             seq = seq.upper()
             length = len(seq)  # cast as an int
             bases['total'] += length
             lengths['total'].append(length)
-            bin_me = length/bin_size  # bin number as an int
-    compile_metrics(metrics, lengths, bases)
+            bin_me = str(int(length/bin_size))  # bin number as an int
+            if bin_me not in bins:
+                bins[bin_me] = 0
+            bins[bin_me] += 1
+    compile_metrics(metrics, lengths, bases, bins, passes)
     metrics['pgc'] = round((float(bases['G'] + bases['C'])/float(bases['total']))*100)
     return metrics  # standard
 
@@ -83,11 +108,12 @@ def hifi_profiler(fastq, bin_size):
 @click.option('--human_readable', is_flag=True,
          help='''Outputs Human Readable Stats''')
 @click.option('--bin_size', default=1000, help="""Histogram Bin Size (default: 1000)""")
-@click.option('--log_file', default='./basic_fastq_stats.log',
-help='''File to write log to.  (default:./basic_fastq_stats.log)''')
+@click.option('--split_passes', is_flag=True, help="""Outputs reads into files based on the number of passes.""")
+@click.option('--log_file', default='./hifi_profiler.log',
+help='''File to write log to.  (default:./hifi_profiler.log)''')
 @click.option('--log_level', default='INFO',
 help='''Log level: DEBUG, INFO, WARNING, ERROR, CRITICAL (default:INFO)''')
-def main(fastq, min_gap, classic, human_readable, log_file, log_level):
+def main(fastq, human_readable, bin_size, split_passes, log_file, log_level):
     '''Reads HiFi data and produces metrics about passes.  MORE DOC COMING'''
     log_level = getattr(logging, log_level.upper(), logging.INFO)
     msg_format = '%(asctime)s|%(name)s|[%(levelname)s]: %(message)s'
@@ -102,12 +128,12 @@ def main(fastq, min_gap, classic, human_readable, log_file, log_level):
         logger.warning('stdin seen with FASTQ, will process FASTQ')
     if fastq:
         fastq = os.path.abspath(fastq)
+    stats = hifi_profiler(fastq, bin_size, split_passes)
     if human_readable:
-        stats = hifi_profiler(fastq, bin_size)
         for s in stats:
             print('{}\t{}'.format(s, stats[s]))
     else:
-        print(json.dumps(hifi_profiler(fastq, bin_size)))
+        print(json.dumps(stats))
 
 
 if __name__ == '__main__':
