@@ -48,8 +48,7 @@ def compile_metrics(metrics, lengths, bases, bins, passes):
     metrics['minlen'] = lengths['total'][0]
     metrics['mean'] = get_mean(lengths['total'])  # N50 of all
     metrics['mean_passes'] = get_mean(lengths['passes'])
-    print(bins)
-    print(passes)
+    metrics['passes_by_len'] = lengths['passes_by_len']  # redundant
     metrics['length_bins'] = [ (i, bins[i]) for i in sorted(bins.keys(),
                                                        key=lambda k: int(k)) ]
     metrics['passes_bins'] = [ (i, passes[i]) for i in sorted(passes.keys(), 
@@ -69,9 +68,9 @@ def hifi_profiler(fastq, bin_size, split_passes):
              'T': 0, 't': 0, 'G': 0, 'g': 0,
              'N': 0, 'n': 0, 'IUPAC': 0, 'total': 0}
     metrics = {'maxlen': 0, 'minlen': 0, 'records': 0, 'mean_passes': 0,
-               'mean': 0, 'allbases': 0, 'pgc': 0, 'length_bins': [],
-               'passes_bins': []}
-    lengths = {'total': [], 'passes': []}
+               'mean': 0, 'allbases': 0}
+    lengths = {'length_bins': [], 'passes': [], 'total': [], 
+               'passes_bins': [], 'passes_by_len': {}}
     length = 0
     bins = {}  # for plotting
     passes = {}
@@ -88,7 +87,9 @@ def hifi_profiler(fastq, bin_size, split_passes):
             lengths['passes'].append(int(my_passes))
             if my_passes not in passes:
                 passes[my_passes] = 0
+                lengths['passes_by_len'][my_passes] = []
             passes[my_passes] += 1
+            lengths['passes_by_len'][my_passes].append(len(seq))
         if seq:
             seq = seq.upper()
             length = len(seq)  # cast as an int
@@ -99,7 +100,7 @@ def hifi_profiler(fastq, bin_size, split_passes):
                 bins[bin_me] = 0
             bins[bin_me] += 1
     compile_metrics(metrics, lengths, bases, bins, passes)
-    metrics['pgc'] = round((float(bases['G'] + bases['C'])/float(bases['total']))*100)
+#    metrics['pgc'] = round((float(bases['G'] + bases['C'])/float(bases['total']))*100)
     return metrics  # standard
 
 

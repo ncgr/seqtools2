@@ -42,7 +42,7 @@ setup(
     entry_points={
         'console_scripts': [NAME + ' = ' + NAME + ':cli']
     },
-    version = '0.0.5',
+    version = '0.0.8',
 #    use_scm_version={
 #        'version_scheme': 'guess-next-dev',
 #        'local_scheme': 'dirty-tag',
