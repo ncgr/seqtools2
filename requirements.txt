@@ -1,5 +1,5 @@
 biopython==1.73
 Click==7.0
 intervaltree==3.0.2
-numpy==1.16.3
+numpy==1.22.0
 sortedcontainers==2.1.0
